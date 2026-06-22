@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análise Estratégica e Arquitetural - Manicure Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #673AB7;
+      --primary-light: #EDE7F6;
+      --secondary: #4CAF50;
+      --secondary-light: #E8F5E9;
+      --text: #2C3E50;
+      --text-light: #607D8B;
+      --bg: #F4F6F9;
+      --card-bg: #FFFFFF;
+      --border: #E0E0E0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: var(--card-bg);
+      padding: 50px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 30px;
+    }
+
+    header h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      color: var(--primary);
+      font-size: 32px;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      color: var(--text-light);
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 22px;
+      margin-top: 35px;
+      margin-bottom: 15px;
+      border-left: 5px solid var(--primary);
+      padding-left: 12px;
+    }
+
+    h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--text);
+      font-size: 16px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-bottom: 15px;
+      text-align: justify;
+      color: #34495E;
+    }
+
+    ul {
+      margin-left: 20px;
+      margin-bottom: 20px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    li strong {
+      color: var(--primary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 25px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 12px 15px;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    tr:nth-child(even) {
+      background-color: #F8F9FA;
+    }
+
+    .badge-diff {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .alert-box {
+      background-color: var(--secondary-light);
+      border-left: 5px solid var(--secondary);
+      padding: 15px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+      font-weight: 500;
+      color: #2E7D32;
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .btn-print {
+      display: inline-block;
+      background-color: var(--primary);
+      color: white;
+      padding: 12px 24px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.3s;
+    }
+
+    .btn-print:hover {
+      background-color: #512DA8;
+    }
+
+    @media print {
+      body {
+        background-color: white;
+        padding: 0;
+      }
+      .container {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+      }
+      .btn-print {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div style="text-align: center;">
+    <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar como PDF</button>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>Análise Estratégica e Arquitetural</h1>
+      <p>Aplicativo Manicure Pro &bull; Relatório Executivo de Engenharia e Negócio</p>
+    </header>
+
+    <h2>1. Comparativo de Mercado (Manicure Pro vs. Concorrentes)</h2>
+    <p>No mercado de beleza e estética, a maioria dos sistemas adota o modelo SaaS (Software as a Service) focado em nuvem. Veja como o <strong>Manicure Pro</strong> se posiciona frente aos líderes do setor (Trinks, Avec e BeautyDate):</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Característica</th>
+          <th>Manicure Pro</th>
+          <th>Trinks / Avec</th>
+          <th>BeautyDate / SimplyBook</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Dependência de Internet</strong></td>
+          <td><span class="badge-diff">Zero (100% Offline)</span></td>
+          <td>Total (Inoperante sem rede)</td>
+          <td>Total (Nuvem/Web)</td>
+        </tr>
+        <tr>
+          <td><strong>Custo de Licença</strong></td>
+          <td>Gratuito / Único</td>
+          <td>Mensalidades + Taxas por agendamento</td>
+          <td>Mensalidades altas em moeda estrangeira</td>
+        </tr>
+        <tr>
+          <td><strong>Privacidade dos Dados</strong></td>
+          <td>Máxima (Salvo apenas no dispositivo)</td>
+          <td>Baixa (Compartilhado com terceiros)</td>
+          <td>Média (Conformidade em nuvem)</td>
+        </tr>
+        <tr>
+          <td><strong>Velocidade de Operação</strong></td>
+          <td>Instantânea (Sem latência de rede)</td>
+          <td>Média (Dependente de APIs)</td>
+          <td>Lenta / Média</td>
+        </tr>
+        <tr>
+          <td><strong>Calculadora de Comissão</strong></td>
+          <td>Nativa & Simplificada</td>
+          <td>Complexa (Regras corporativas)</td>
+          <td>Inexistente na maioria das versões</td>
+        </tr>
+        <tr>
+          <td><strong>Controle de Estoque</strong></td>
+          <td>Simples com Alerta Crítico visual</td>
+          <td>Avançado</td>
+          <td>Disponível apenas como add-on pago</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="alert-box">
+      <strong>O Diferencial Competitivo do Manicure Pro:</strong> O aplicativo preenche uma lacuna crucial ignorada pelas grandes corporações: a manicure autônoma ou de pequeno salão que necessita de agilidade absoluta e odeia burocracia. O Manicure Pro foca na velocidade extrema de uso no dia a dia.
+    </div>
+
+    <h2>2. Análise de Arquitetura de Software &amp; Flutter</h2>
+    <p>O aplicativo foi desenvolvido com excelente foco prático e excelente design. Analisando a engenharia de software de nível sênior, destacam-se os seguintes pontos:</p>
+
+    <h3>Pontos Fortes da Arquitetura</h3>
+    <ul>
+      <li><strong>Otimização de Consultas SQL (Sem ORMs Pesados):</strong> A escolha de usar SQL puro via <code>sqflite</code> em vez de pacotes abstratos pesados permite o uso de INNER JOINs (como na busca da agenda diária) e agregações eficientes no banco. Isso garante desempenho máximo mesmo após anos de histórico.</li>
+      <li><strong>Design System Consistente:</strong> O tema Dark com contraste em roxo, verde e laranja gera uma interface de alto nível visual que promove engajamento e tem aspecto extremamente profissional.</li>
+      <li><strong>Segurança Transacional:</strong> Tratamento sistemático de erros em blocos <code>try-catch</code> no banco de dados e telas, garantindo estabilidade e feedback claro ao usuário via SnackBars.</li>
+    </ul>
+
+    <h3>Oportunidades de Evolução de Engenharia</h3>
+    <ul>
+      <li><strong>Gerenciamento de Estado Moderno:</strong> Conforme o app crescer em telas, substituir o padrão setState clássico por abordagens robustas como <strong>Riverpod</strong> ou <strong>Bloc/Cubit</strong> isolará perfeitamente as regras de negócio das telas de visualização.</li>
+      <li><strong>Injeção de Dependências:</strong> Adotar o pacote <code>get_it</code> facilitará o gerenciamento e testes de instâncias estáticas do banco de dados.</li>
+    </ul>
+
+    <h2>3. Visão de Negócio &amp; UX (Foco no Mercado Estético)</h2>
+    <p>No atendimento autônomo, tempo e foco no cliente são cruciais. O Manicure Pro atende com maestria às três maiores "dores" dessas profissionais:</p>
+
+    <ul>
+      <li><strong>Prevenção de Faltas de Insumos (Estoque Crítico):</strong> O alerta em vermelho para quantidade de estoque &le; 3 unidades impede que a profissional perca clientes por falta de produtos comuns, como esmaltes ou removedores.</li>
+      <li><strong>Evitar Exaustão Física (Dia Lotado):</strong> O cálculo e alerta laranja de limite de expediente protege o bem-estar da manicure, permitindo que ela faça agendamentos de exceção de forma consciente.</li>
+      <li><strong>Agilidade Contábil (Calculadora Rápida):</strong> Manicures parceiras que recebem sob comissão perdem horas semanais somando faturamento. A presença da calculadora no menu lateral resolve essa dor em menos de 10 segundos.</li>
+    </ul>
+
+    <h2>4. Roadmap Tecnológico Recomendado</h2>
+    <p>Para alçar o Manicure Pro a patamares internacionais, sugerimos três melhorias progressivas:</p>
+
+    <ul>
+      <li><strong>Lembretes Inteligentes via WhatsApp:</strong> Botão rápido para abrir link direto de conversa contendo texto de confirmação gerado de forma automática (Sem APIs pagas!).</li>
+      <li><strong>Sincronização em Nuvem Híbrida:</strong> Uso de sincronização transparente em segundo plano com bancos como Supabase/Firebase, mantendo a operação offline local como principal.</li>
+      <li><strong>Gráficos de Performance:</strong> Uso de gráficos visuais (com o pacote <code>fl_chart</code>) de faturamento e serviços mais realizados para análises executivas mensais.</li>
+    </ul>
+
+    <footer>
+      Manicure Pro &copy; 2026. Todos os direitos reservados.
+    </footer>
+  </div>
+
+</body>
+</html>
