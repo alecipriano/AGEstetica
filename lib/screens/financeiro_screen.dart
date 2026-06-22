@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:open_filex/open_filex.dart';
 import '../database/database_helper.dart';
 
 class FinanceiroScreen extends StatefulWidget {
@@ -87,7 +87,7 @@ class _FinanceiroScreenState extends State<FinanceiroScreen> {
     }
   }
 
-  Future<void> _exportarCSV() async {
+  Future<void> _exportarExcel() async {
     try {
       String? dataPrefixo;
       String? dataInicio;
@@ -128,30 +128,118 @@ class _FinanceiroScreenState extends State<FinanceiroScreen> {
         return;
       }
 
-      StringBuffer csv = StringBuffer();
-      // BOM UTF-8 para compatibilidade com Excel
-      csv.write('\uFEFF');
-      csv.writeln('ID;Data e Hora;Cliente;Serviços;Valor Total (R\$)');
+      // Constrói a planilha em HTML com estilo Premium
+      StringBuffer html = StringBuffer();
+      html.write('''
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta charset="utf-8">
+  <!--[if gte mso 9]>
+  <xml>
+    <x:ExcelWorkbook>
+      <x:ExcelWorksheets>
+        <x:ExcelWorksheet>
+          <x:Name>Relatorio</x:Name>
+          <x:WorksheetOptions>
+            <x:DisplayGridlines/>
+          </x:WorksheetOptions>
+        </x:ExcelWorksheet>
+      </x:ExcelWorksheets>
+    </x:ExcelWorkbook>
+  </xml>
+  <![endif]-->
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    table { border-collapse: collapse; border: 1px solid #D1C4E9; }
+  </style>
+</head>
+<body>
+  <table>
+    <tr>
+      <td colspan="5" style="background-color: #6A1B9A; color: #FFFFFF; font-weight: bold; font-size: 16px; text-align: center; padding: 12px; border: 1px solid #D1C4E9;">AGEstetica - Relatório Financeiro</td>
+    </tr>
+    <tr>
+      <td colspan="3" style="background-color: #E1BEE7; color: #4A148C; font-size: 12px; padding: 8px; border: 1px solid #D1C4E9;"><b>Período:</b> ${periodoTitulo.replaceAll('_', ' ')}</td>
+      <td colspan="2" style="background-color: #E1BEE7; color: #4A148C; font-size: 12px; padding: 8px; border: 1px solid #D1C4E9; text-align: right;"><b>Gerado em:</b> ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}</td>
+    </tr>
+    <tr>
+      <th style="background-color: #4A148C; color: #FFFFFF; font-weight: bold; padding: 10px; border: 1px solid #D1C4E9; font-size: 13px; text-align: left;">ID</th>
+      <th style="background-color: #4A148C; color: #FFFFFF; font-weight: bold; padding: 10px; border: 1px solid #D1C4E9; font-size: 13px; text-align: left;">Data e Hora</th>
+      <th style="background-color: #4A148C; color: #FFFFFF; font-weight: bold; padding: 10px; border: 1px solid #D1C4E9; font-size: 13px; text-align: left;">Cliente</th>
+      <th style="background-color: #4A148C; color: #FFFFFF; font-weight: bold; padding: 10px; border: 1px solid #D1C4E9; font-size: 13px; text-align: left;">Serviço(s)</th>
+      <th style="background-color: #4A148C; color: #FFFFFF; font-weight: bold; padding: 10px; border: 1px solid #D1C4E9; font-size: 13px; text-align: right;">Valor</th>
+    </tr>
+''');
+
+      bool alternate = false;
+      double somaTotal = 0.0;
+
       for (var row in relatorio) {
         final id = row['id'];
-        final dataHora = row['data_hora'];
-        final cliente = row['cliente_nome'];
+        
+        String dataFormatada = row['data_hora'] ?? '';
+        try {
+          final dt = DateTime.parse(row['data_hora']);
+          dataFormatada = DateFormat('dd/MM/yyyy HH:mm').format(dt);
+        } catch (_) {}
+
+        final cliente = row['cliente_nome'] ?? '';
         final servicos = row['servicos'] ?? 'Nenhum';
-        final valor = (row['valor_total'] as num?)?.toStringAsFixed(2) ?? '0.00';
-        csv.writeln('$id;$dataHora;$cliente;$servicos;$valor');
+        final valNum = (row['valor_total'] as num?)?.toDouble() ?? 0.0;
+        somaTotal += valNum;
+        final valorTexto = valNum.toStringAsFixed(2);
+        
+        final tdStyle = alternate
+            ? 'style="background-color: #F3E5F5; padding: 8px; border: 1px solid #D1C4E9; font-size: 12px; color: #000000;"'
+            : 'style="background-color: #FFFFFF; padding: 8px; border: 1px solid #D1C4E9; font-size: 12px; color: #000000;"';
+        
+        final tdNumStyle = alternate
+            ? 'style="background-color: #F3E5F5; padding: 8px; border: 1px solid #D1C4E9; font-size: 12px; color: #000000; text-align: right;"'
+            : 'style="background-color: #FFFFFF; padding: 8px; border: 1px solid #D1C4E9; font-size: 12px; color: #000000; text-align: right;"';
+
+        html.write('''
+    <tr>
+      <td $tdStyle>$id</td>
+      <td $tdStyle>$dataFormatada</td>
+      <td $tdStyle>$cliente</td>
+      <td $tdStyle>$servicos</td>
+      <td $tdNumStyle>R\$ $valorTexto</td>
+    </tr>
+''');
+        alternate = !alternate;
       }
 
-      final directory = await getTemporaryDirectory();
-      final path = '${directory.path}/relatorio_financeiro_$periodoTitulo.csv';
-      final file = File(path);
-      await file.writeAsString(csv.toString(), encoding: utf8);
+      // Adiciona linha do Total ao final da tabela
+      html.write('''
+    <tr>
+      <td colspan="4" style="background-color: #4A148C; color: #FFFFFF; font-weight: bold; font-size: 13px; text-align: right; padding: 10px; border: 1px solid #D1C4E9;">Total do Período:</td>
+      <td style="background-color: #4A148C; color: #FFFFFF; font-weight: bold; font-size: 13px; text-align: right; padding: 10px; border: 1px solid #D1C4E9;">R\$ ${somaTotal.toStringAsFixed(2)}</td>
+    </tr>
+  </table>
+</body>
+</html>
+''');
 
-      // ignore: deprecated_member_use
-      await Share.shareXFiles([XFile(path)], subject: 'Relatório Financeiro CSV');
+      final directory = await getTemporaryDirectory();
+      final path = '${directory.path}/relatorio_financeiro_$periodoTitulo.xls';
+      final file = File(path);
+      await file.writeAsString(html.toString(), encoding: utf8);
+
+      await OpenFilex.open(path);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Planilha Excel gerada com sucesso!'),
+          action: SnackBarAction(
+            label: 'Abrir',
+            onPressed: () => OpenFilex.open(path),
+          ),
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao exportar CSV: $e')),
+        SnackBar(content: Text('Erro ao exportar Excel: $e')),
       );
     }
   }
@@ -205,19 +293,41 @@ class _FinanceiroScreenState extends State<FinanceiroScreen> {
           pageFormat: PdfPageFormat.a4,
           build: (pw.Context context) {
             return [
-              pw.Header(
-                level: 0,
+              // Cabeçalho Premium Colorido (Roxo)
+              pw.Container(
+                decoration: const pw.BoxDecoration(
+                  color: PdfColor.fromInt(0xff4a148c), // Deep Purple
+                  borderRadius: pw.BorderRadius.all(pw.Radius.circular(6)),
+                ),
+                padding: const pw.EdgeInsets.all(12),
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text('Relatório Financeiro - Manicure Pro', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-                    pw.Text('Período: $periodoTitulo', style: const pw.TextStyle(fontSize: 10)),
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text('AGEstetica', style: pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
+                        pw.Text('Relatório Financeiro de Atendimentos', style: pw.TextStyle(fontSize: 12, color: PdfColors.purple100)),
+                      ],
+                    ),
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.end,
+                      children: [
+                        pw.Text('Período: $periodoTitulo', style: pw.TextStyle(fontSize: 10, color: PdfColors.white, fontWeight: pw.FontWeight.bold)),
+                        pw.Text(
+                          'Gerado em: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                          style: pw.TextStyle(fontSize: 8, color: PdfColors.purple200),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
               pw.SizedBox(height: 20),
+              
+              // Tabela Customizada e Colorida
               pw.TableHelper.fromTextArray(
-                headers: ['ID', 'Data/Hora', 'Cliente', 'Serviços', 'Valor (R\$)'],
+                headers: ['ID', 'Data/Hora', 'Cliente', 'Serviço(s)', 'Valor'],
                 data: relatorio.map((row) {
                   final id = row['id'].toString();
                   String dataFormatada = row['data_hora'];
@@ -231,8 +341,10 @@ class _FinanceiroScreenState extends State<FinanceiroScreen> {
                   final valor = (row['valor_total'] as num?)?.toStringAsFixed(2) ?? '0.00';
                   return [id, dataFormatada, cliente, servicos, 'R\$ $valor'];
                 }).toList(),
-                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+                headerDecoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xff9c27b0)), // Purple Accent
+                rowDecoration: const pw.BoxDecoration(color: PdfColors.white),
+                oddRowDecoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xfff3e5f5)), // Linhas alternadas em lilás claro
                 cellHeight: 25,
                 cellAlignments: {
                   0: pw.Alignment.centerLeft,
@@ -243,11 +355,20 @@ class _FinanceiroScreenState extends State<FinanceiroScreen> {
                 },
               ),
               pw.SizedBox(height: 20),
+              
+              // Total de Faturamento em Destaque
               pw.Align(
                 alignment: pw.Alignment.centerRight,
-                child: pw.Text(
-                  'Faturamento Total: R\$ ${_faturamento.toStringAsFixed(2)}',
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                child: pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: const pw.BoxDecoration(
+                    color: PdfColor.fromInt(0xff4a148c), // Deep Purple
+                    borderRadius: pw.BorderRadius.all(pw.Radius.circular(4)),
+                  ),
+                  child: pw.Text(
+                    'Faturamento Total: R\$ ${_faturamento.toStringAsFixed(2)}',
+                    style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+                  ),
                 ),
               ),
             ];
@@ -260,8 +381,17 @@ class _FinanceiroScreenState extends State<FinanceiroScreen> {
       final file = File(path);
       await file.writeAsBytes(await pdf.save());
 
-      // ignore: deprecated_member_use
-      await Share.shareXFiles([XFile(path)], subject: 'Relatório Financeiro PDF');
+      await OpenFilex.open(path);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('PDF gerado com sucesso!'),
+          action: SnackBarAction(
+            label: 'Abrir',
+            onPressed: () => OpenFilex.open(path),
+          ),
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -505,13 +635,13 @@ class _FinanceiroScreenState extends State<FinanceiroScreen> {
         Expanded(
           child: ElevatedButton.icon(
             icon: const Icon(Icons.table_chart, color: Colors.black),
-            label: const Text('Excel (CSV)', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
+            label: const Text('Excel', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.amber,
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            onPressed: _exportarCSV,
+            onPressed: _exportarExcel,
           ),
         ),
         const SizedBox(width: 12),
